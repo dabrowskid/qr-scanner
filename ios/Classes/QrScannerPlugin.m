@@ -1,15 +1,44 @@
 #import "QrScannerPlugin.h"
-#if __has_include(<qr_scanner/qr_scanner-Swift.h>)
-#import <qr_scanner/qr_scanner-Swift.h>
-#else
-// Support project import fallback if the generated compatibility header
-// is not copied when this plugin is created as a library.
-// https://forums.swift.org/t/swift-static-libraries-dont-copy-generated-objective-c-header/19816
-#import "qr_scanner-Swift.h"
-#endif
+#import "QrScannerViewController.h"
+
 
 @implementation QrScannerPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-  [SwiftQrScannerPlugin registerWithRegistrar:registrar];
+    FlutterMethodChannel *channel = [FlutterMethodChannel methodChannelWithName:@"pl.carbuddy.qr_scanner" binaryMessenger:registrar.messenger];
+    
+    QrScannerPlugin *instance = [QrScannerPlugin new];
+    instance.hostViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+    [registrar addMethodCallDelegate:instance channel:channel];
+}
+
+- (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {
+    if ([@"scanCode" isEqualToString:call.method]) {
+        self.result = result;
+        [self showBarcodeView];
+    } else {
+        result(FlutterMethodNotImplemented);
+    }
+}
+
+- (void)showBarcodeView {
+    QrScannerViewController *scannerViewController = [[QrScannerViewController alloc] init];
+    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:scannerViewController];
+    scannerViewController.delegate = self;
+    [self.hostViewController presentViewController:navigationController animated:NO completion:nil];
+}
+
+
+- (void)barcodeScannerViewController:(QrScannerViewController *)controller didScanBarcodeWithResult:(NSString *)result {
+    if (self.result) {
+        self.result(result);
+    }
+}
+
+- (void)barcodeScannerViewController:(QrScannerViewController *)controller didFailWithErrorCode:(NSString *)errorCode {
+    if (self.result){
+        self.result([FlutterError errorWithCode:errorCode
+                                        message:nil
+                                        details:nil]);
+    }
 }
 @end
