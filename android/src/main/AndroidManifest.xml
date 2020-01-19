@@ -1,3 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="pl.carbuddy.qr_scanner">
+    package="pl.carbuddy.qr_scanner">
+
+    <application>
+        <activity
+            android:name=".CodeScannerActivity"
+            android:label="@string/title_activity_code_scanner"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+    </application>
+
 </manifest>

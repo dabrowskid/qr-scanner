@@ -1,7 +1,9 @@
 package pl.carbuddy.qr_scanner
 
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.util.Log
 import androidx.annotation.NonNull;
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -11,32 +13,28 @@ import io.flutter.plugin.common.PluginRegistry
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
 /** QrScannerPlugin */
-public class QrScannerPlugin(val activity: Activity) : MethodCallHandler,
+class QrScannerPlugin(val activity: Activity) : MethodCallHandler,
         PluginRegistry.ActivityResultListener {
 
+    var result: Result? = null
 
-    // This static function is optional and equivalent to onAttachedToEngine. It supports the old
-    // pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
-    // plugin registration via this function while apps migrate to use the new Android APIs
-    // post-flutter-1.12 via https://flutter.dev/go/android-project-migration.
-    //
-    // It is encouraged to share logic between onAttachedToEngine and registerWith to keep
-    // them functionally equivalent. Only one of onAttachedToEngine or registerWith will be called
-    // depending on the user's project. onAttachedToEngine or registerWith must both be defined
-    // in the same class.
+
     companion object {
+        val RESULT_CODE = "pl.carbuddy.qr_scanner.scan_result"
+
         @JvmStatic
         fun registerWith(registrar: Registrar) {
-            val channel = MethodChannel(registrar.messenger(), "qr_scanner")
-            channel.setMethodCallHandler(QrScannerPlugin(registrar.activity()))
+            val channel = MethodChannel(registrar.messenger(), "pl.carbuddy.qr_scanner")
+            val qrScannerPlugin = QrScannerPlugin(registrar.activity())
+            channel.setMethodCallHandler(qrScannerPlugin)
+            registrar.addActivityResultListener(qrScannerPlugin)
         }
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-        if (call.method == "getPlatformVersion") {
-            result.success("Android ${android.os.Build.VERSION.RELEASE}")
+        if (call.method == "scanCode") {
+            this.result = result
             showBarcodeView()
-
         } else {
             result.notImplemented()
         }
@@ -44,12 +42,17 @@ public class QrScannerPlugin(val activity: Activity) : MethodCallHandler,
 
 
     private fun showBarcodeView() {
-        val intent = Intent(activity, QrScannerActivity.javaClass)
+        val intent = Intent(activity, CodeScannerActivity::class.java)
         activity.startActivityForResult(intent, 100)
     }
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if (requestCode == 100 && resultCode == RESULT_OK && data != null) {
+            val code = data.getStringExtra(RESULT_CODE)
+            code?.let { this.result?.success(code) }
+            return true
+        }
+        return false
     }
 }
