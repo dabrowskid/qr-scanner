@@ -78,7 +78,10 @@
     [self.scanner startScanningWithResultBlock:^(NSArray<AVMetadataMachineReadableCodeObject *> *codes) {
         [self.scanner stopScanning];
          AVMetadataMachineReadableCodeObject *code = codes.firstObject;
+        NSLog(@"%@", code);
+        
         if (code) {
+            [self.delegate barcodeScannerViewController:self didScanBarcodeWithResult:[code stringValue]];
 //            [self.delegate QrScannerViewController:self didFailWithErrorCode:@"PERMISSION_NOT_GRANTED"];
             [self dismissViewControllerAnimated:NO completion:nil];
         }
