@@ -1,4 +1,4 @@
-include ':app', ':code-scanner', ':zxing-core'
+include ':app'
 
 def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
 

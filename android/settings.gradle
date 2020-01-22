@@ -1,1 +1,2 @@
 rootProject.name = 'qr_scanner'
+include ':code-scanner', ':zxing-core'
