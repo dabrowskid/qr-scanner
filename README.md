@@ -19,11 +19,31 @@ https://github.com/apptreesoftware/flutter_barcode_reader
 
 ## Getting Started
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+Import to your project  
+```
+dependencies:
+  qr_scanner:
+    git:
+      url: git://github.com/dabrowskid/qr-scanner.git
+```
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+Add permissions to camera 
+
+AndroidManifest.xml
+```
+<uses-permission android:name="android.permission.CAMERA"></uses-permission>
+```
+
+Info.plist
+```
+	<key>NSCameraUsageDescription</key>
+	<string>Scan Aztec Code</string>
+```
+
+And then : 
+
+```
+import 'package:qr_scanner/qr_scanner.dart';
+
+String barcode = await QrScanner.scan();
+```
